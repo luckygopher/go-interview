@@ -125,7 +125,25 @@ TCP协议的三次握手和四次挥手？为什么是三次和四次？
 暂无
 
 ### 数据结构与算法
-冒泡排序
+// 题目：将6，2，10，32，9，5，18，14，30，29从小到大进行排列,使用冒泡排序
+```go
+package main
+
+import "fmt"
+
+func main() {
+    // 定义数组
+    arr := [10]int{6, 2, 10, 32, 9, 5, 18, 14, 30, 29}
+    for i := 0; i < len(arr); i++ {
+        for j := 0; j < len(arr)-i-1; j++ {
+            if arr[j] > arr[j+1] {
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+            }
+        }
+    }
+    fmt.Println(arr)
+}
+```
 
 快排
 

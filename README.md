@@ -167,7 +167,6 @@ type bmap struct {
 ```
 map的扩容过程是怎样的？
 ```markdown
-
 相同容量扩容
 2倍容量扩容
 
@@ -183,7 +182,7 @@ map的扩容过程是怎样的？
 扩容策略：开辟一个新的bucket空间，将老bucket中的元素移动到新bucket，使得
 同一个bucket中的key排列更紧密，节省空间，提高bucket利用率。
 ```
-map的key的定为过程是怎样的？
+map的key的定位过程是怎样的？
 ```markdown
 对key计算hash值，计算它落到那个桶时，只会用到最后B个bit位，再用哈希值的高8位
 找到key在bucket中的位置。桶内没有key会找第一个空位放入，冲突则从前往后找到第一个空位。

@@ -103,25 +103,77 @@ map的key必须可以比较，func、map、slice这三种类型不可比较，
 只有在都是nil的情况下，才可与nil (== or !=)。因此这三种类型
 不能作为map的key。
 
-map的迭代顺序是不确定的，因为不同的哈希函数实现可能导致不同的遍历顺序，
-map的顺序取决于所使用的哈希函数，随机哈希的目的是防止黑客使用哈希冲突的拒绝服务攻击。
+1、map在扩容后，会发生key的搬迁，原来落在同一个bucket中的key可能分散，key的位置发生了变化。
+2、go中遍历map时，并不是固定从0号bucket开始遍历，每次都是从一个随机值序号的bucket开始遍历，
+并且是从这个bucket的一个随机序号的cell开始遍历。
+3、哈希查找表用一个哈希函数将key分配到不同的bucket(数组的下标index)。不同的哈希函数实现也
+会导致map无序。
+
+"迭代map的结果是无序的"这个特性是从go1.0开始加入的。
+```
+如何解决哈希查找表存在的"碰撞"问题（hash冲突）？
+```markdown
+hash碰撞指的是：两个不同的原始值被哈希之后的结果相同，也就是不同的key被哈希分配到了同一个bucket。
+
+链表法：将一个bucket实现成一个链表，落在同一个bucket中的key都会插入这个链表。
+
+开放地址法：碰撞发生后，从冲突的下标处开始往后探测，到达数组末尾时，从数组开始处探测，直到找到一个
+空位置存储这个key，当找不到位置的情况下会触发扩容。
 ```
 map是线程安全的么？
 ```markdown
-map在并发的情况下，只读是线程安全的，但同时读写是线程不安全的，sync.map是线程安全的。
+map不是线程安全的，sync.map是线程安全的。
+
+在查找、赋值、遍历、删除的过程中都会检测写标志，一旦发现写标志"置位"等于1，则直接panic,
+因为这表示有其他协程同时在进行写操作。赋值和删除函数在检测完写标志是"复位"之后，先将
+写标志位"置位"，才会进行之后的操作。
 ```
 map的底层实现原理是什么？
 ```markdown
-在go中map是数组存储的，每个数组下标处存储的是一个bucket，每个bucket中
-可以存储8个kv键值对，当每个bucket存储的kv对到达8个之后，会通过overflow
-指针指向一个新的bucket，从而形成一个链表。
+type hmap struct {
+    count      int   // len(map)元素个数
+    flags      uint8 //写标志位
+    B          uint8 // buckets数组的长度的对数，buckets数组的长度是2^B
+    noverflow  uint16
+    hash0      uint32
+    buckets    unsafe.Pointer // 指向buckets数组
+    oldbuckets unsafe.Pointer // 扩容的时候，buckets长度会是oldbuckets的两倍
+    nevacuate  uintptr
+    extra      *mapextra
+}
+
+// 编译期间动态创建的bmap
+type bmap struct {
+    topbits  [8]uint8
+    keys     [8]keytype
+    values   [8]valuetype
+    pad      uintptr
+    overflow uintptr
+}
+
+在go中map是数组存储的，采用的是哈希查找表，通过哈希函数将key分配到不同的bucket，
+每个数组下标处存储的是一个bucket，每个bucket中可以存储8个kv键值对，当每个bucket
+存储的kv对到达8个之后，会通过overflow指针指向一个新的bucket，从而形成一个链表。
 ```
 map的扩容过程是怎样的？
+```markdown
+扩容时机:
+1、当装载因子超过6.5时，表明很多桶都快满了，查找和插入效率都变低了，触发扩容。
 
-map的赋值过程和查找过程是怎样的？
+扩容策略：元素太多，bucket数量少，则将B加1，buctet最大数量(2^B)直接变为
+原来bucket数量的2倍，再渐进式的把key/value迁移到新的内存地址。
 
-如何解决hash冲突？
+2、无法触发条件1，overflow bucket数量太多，查找、插入效率低，触发扩容。
+(可以理解为：一座空城，房子很多，但是住户很少，都分散了，找起人来很困难)
 
+扩容策略：开辟一个新的bucket空间，将老bucket中的元素移动到新bucket，使得
+同一个bucket中的key排列更紧密，节省空间，提高bucket利用率。
+```
+map的key的定为过程是怎样的？
+```markdown
+对key计算hash值，计算它落到那个桶时，只会用到最后B个bit位，再用哈希值的高8位
+找到key在bucket中的位置。桶内没有key会找第一个空位放入，冲突则从前往后找到第一个空位。
+```
 iface和eface的区别是什么？值接收者和指针接收者的区别？
 ```markdown
 iface比eface中间多了一层itab结构，itab结构存储_type信息和[]func方法集。

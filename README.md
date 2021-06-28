@@ -230,25 +230,31 @@ kafka如何保证消息的顺序性？
 kafka集群消息积压问题如何处理？
 
 ### redis
-redis与memcached的区别？
-
 redis单线程为什么效率也这么高？
+1. 纯内存
+2. IO多路复用
+3. 减少锁的竞争
 
 redis有那五种常用的数据结构？应用场景以及实现原理是什么？
+1. string  记数 SDS(RAW，embstr，int)
+2. hash  缓存结构数据 quicklist（hashtable，ziplist）
+3. list 队列 （ziplist，linkedlist）
+4. set 集合 （intset，hashtable）
+5. zset 延迟队列 （ziplist，skiplist）+ 字典
 
 redis如何实现延迟队列？
+zset
 
 redis的过期策略？
-
-redis集群有那三种模式？
-
-redis的事务？
+被动+主动
 
 redis与mysql双写一致性解决方案？
+CAP；先数据库，然后缓存（高可用）；
 
 发生缓存穿透、击穿、雪崩的原因以及解决方案？
-
-布隆过滤器的了解？
+穿透：非法数据；数据检验，布隆过滤器
+雪崩：服务器不可用/数据大规模失效；随机过期时间、均衡负载、限流
+击穿：热点数据过期；不过期/异步更新，限流
 
 ### 网络协议
 浏览器访问一个网站，都经历了怎样一个流程？

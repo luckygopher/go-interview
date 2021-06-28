@@ -91,7 +91,6 @@ type waitq struct {
 // channel的发送和接收操作本质上都是"值的拷贝"(并不是将指针"发送"到了chan里面，
 // 只是拷贝它的值而已)，无论是从sender goroutine的栈到chan buf，还是
 // 从chan buf到receiver goroutine，或者是直接从sender goroutine到receiver goroutine。
-
 ```
 channel在哪些情况下会死锁/阻塞？
 ```markdown
@@ -120,11 +119,14 @@ map的key必须可以比较，func、map、slice这三种类型不可比较，
 ```
 如何解决哈希查找表存在的"碰撞"问题（hash冲突）？
 ```markdown
-hash碰撞指的是：两个不同的原始值被哈希之后的结果相同，也就是不同的key被哈希分配到了同一个bucket。
+hash碰撞指的是：
+两个不同的原始值被哈希之后的结果相同，也就是不同的key被哈希分配到了同一个bucket。
 
-链表法：将一个bucket实现成一个链表，落在同一个bucket中的key都会插入这个链表。
+链表法：
+将一个bucket实现成一个链表，落在同一个bucket中的key都会插入这个链表。
 
-开放地址法：碰撞发生后，从冲突的下标处开始往后探测，到达数组末尾时，从数组开始处探测，直到找到一个
+开放地址法：
+碰撞发生后，从冲突的下标处开始往后探测，到达数组末尾时，从数组开始处探测，直到找到一个
 空位置存储这个key，当找不到位置的情况下会触发扩容。
 ```
 map是线程安全的么？
@@ -163,11 +165,9 @@ type bmap struct {
 在go中map是数组存储的，采用的是哈希查找表，通过哈希函数将key分配到不同的bucket，
 每个数组下标处存储的是一个bucket，每个bucket中可以存储8个kv键值对，当每个bucket
 存储的kv对到达8个之后，会通过overflow指针指向一个新的bucket，从而形成一个链表。
-
 ```
 map的扩容过程是怎样的？
 ```markdown
-
 相同容量扩容
 2倍容量扩容
 
@@ -195,17 +195,15 @@ iface比eface中间多了一层itab结构，itab结构存储_type信息和[]func
 接口的构造过程是怎样的？
 
 context是什么？有什么作用？如何被取消？
-```
+```markdown
 上下文；控制与传值；主动与被动
 ```
-
 go中的指针有什么限制？
 
 slice的底层数据结构是怎样的？
-```
+```markdown
 切片提供了一个与指向数组的动态窗口
 ```
-
 你了解GC么？常见的GC实现方式有哪些？
 ```markdown
 GC即垃圾回收机制：引用计数、三色标记法+混合写屏障机制

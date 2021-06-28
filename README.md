@@ -163,7 +163,6 @@ type bmap struct {
 在go中map是数组存储的，采用的是哈希查找表，通过哈希函数将key分配到不同的bucket，
 每个数组下标处存储的是一个bucket，每个bucket中可以存储8个kv键值对，当每个bucket
 存储的kv对到达8个之后，会通过overflow指针指向一个新的bucket，从而形成一个链表。
-
 ```
 map的扩容过程是怎样的？
 ```markdown
@@ -189,22 +188,60 @@ map的key的定位过程是怎样的？
 ```
 iface和eface的区别是什么？值接收者和指针接收者的区别？
 ```markdown
-iface比eface中间多了一层itab结构，itab结构存储_type信息和[]func方法集。
-```
-接口的构造过程是怎样的？
+iface和eface都是Go中描述接口的底层结构体，区别在于iface比eface多了itab结构，包含方法。
+而eface则是不包含任何方法的空接口：interface{}
 
-context是什么？有什么作用？如何被取消？
-```
-上下文；控制与传值；主动与被动
-```
+如果方法的接收者是值类型，无论调用者是对象还是对象指针，修改的都是对象的副本，不影响调用
+者；如果方法的接收者是指针类型，则调用者修改的是指针指向的对象本身。
 
-go中的指针有什么限制？
+如果类型具备"原始的本质"，如go中内置的原始类型，就定义值接收者就好。
+如果类型具备"非原始的本质"，不能被安全的复制，这种类型总是应该被共享，则可定义为指针接收者。
+```
+context是什么？如何被取消？有什么作用？
+```markdown
+type Context interface {
+    // 当context被取消或者到了deadline，返回一个被关闭的channel
+    Done() <-chan struct{}
+    // 在channel Done关闭后，返回context取消原因
+    Err() error
+    // 返回context是否会被取消以及自动取消时间(即deadline)
+    Deadline() (deadline time.Time,ok boll)
+    // 获取key对应的value
+    Value(key interface{}) interface{}
+}
 
+type canceler interface {
+    cancel(removeFromParent bool, err error)
+    Done() <-chan struct{} 
+}
+
+context：goroutine的上下文，包含goroutine的运行状态、环境、现场等信息。
+
+实现了canceler接口的Context，就表明是可取消的。
+
+context用来解决goroutine之间退出通知、元数据传递的功能。比如并发控制和超时控制。
+
+注意事项：
+1、不要将Context塞到结构体里，直接将Context类型作为函数的第一参数，而且一般都
+命名为ctx。
+2、不要向函数传入一个nil的Context，如果你实在不知道传什么，标准库给你准备好了
+一个Context：todo
+3、不要把本应该作为函数参数的类型塞到Context中，Context存储的应该是一些共同
+的数据。例如：登陆的session、cookie等
+4、同一个Context可能会被传递到多个goroutine，Context是并发安全的。
+```
 slice的底层数据结构是怎样的？
-```
-切片提供了一个与指向数组的动态窗口
-```
+```markdown
+type slice struct {
+    array unsafe.Pointer
+    len int
+    cap int
+}
 
+slice的底层数据是数组，slice是对数组的封装，它描述一个数组的片段。
+slice可以向后扩展，不可以向前扩展。
+s[i]不可以超越len(s),向后扩展不可以超越底层数组cap(s)。
+```
 你了解GC么？常见的GC实现方式有哪些？
 ```markdown
 GC即垃圾回收机制：引用计数、三色标记法+混合写屏障机制
@@ -253,9 +290,21 @@ v1.8三色标记法+混合写屏障，堆空间启动，栈空间不启动屏障
 的哪些goroutine，并将其转去执行一些辅助标记的工作，从而达到放缓内存分配和加速GC工作
 的目的。
 ```
-内存泄漏是如何发生的，如何解决？
+内存泄漏如何解决？
+```markdown
+1、通过pprof工具获取内存相差较大的两个时间点heap数据。htop可以查看内存增长情况。
+2、通过go tool pprof比较内存情况，分析多出来的内存。
+3、分析代码、修复代码。
+```
+内存逃逸分析？
+```markdown
+在函数中申请一个新的对象，如果分配在栈中，则函数执行结束可自动将内存回收；
+如果分配在堆中，则函数执行结束可交给GC处理。
 
-内存逃逸分析是怎么进行的？
+案例：
+函数返回局部变量指针；
+申请内存过大超过栈的存储能力。
+```
 
 ### mysql
 索引底层实现？为什么选择B+树作为索引结构？B+树的叶子节点都可以存哪些东西？

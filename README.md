@@ -729,14 +729,15 @@ TCP协议的三次握手和四次挥手？为什么是三次和四次？
 ```markdown
 - 三次握手(我要和你建立链接，你真的要和我建立链接么，我真的要和你建立链接，成功)
   
-  第一次握手：Client将标志位SYN置为1，随机产生一个值seq=J，并将该数据包发送给Server，Client进入SYN_SENT状态，等待Server确认。
+  第一次握手：Client将标志位SYN置为1，随机产生一个值seq=J，并将该数据包发送给Server，Client进入SYN_SENT状态，
+  等待Server确认。
   
-  第二次握手：Server收到数据包后由标志位SYN=1知道Client请求建立连接，Server将标志位SYN和ACK都置为1，ack=J+1，随机产生一个值
-seq=K，并将该数据包发送给Client以确认连接请求，Server进入SYN_RCVD状态。
+  第二次握手：Server收到数据包后由标志位SYN=1知道Client请求建立连接，Server将标志位SYN和ACK都置为1，ack=J+1，
+  随机产生一个值seq=K，并将该数据包发送给Client以确认连接请求，Server进入SYN_RCVD状态。
   
-  第三次握手：Client收到确认后，检查ack是否为J+1，ACK是否为1，如果正确则将标志位ACK置为1，ack=K+1，并将该数据包发送给Server，
-Server检查ack是否为K+1，ACK是否为1，如果正确则连接建立成功，Client和Server进入ESTABLISHED状态，完成三次握手，随后Client
-与Server之间可以开始传输数据了。
+  第三次握手：Client收到确认后，检查ack是否为J+1，ACK是否为1，如果正确则将标志位ACK置为1，ack=K+1，并将该数据
+  包发送给Server，Server检查ack是否为K+1，ACK是否为1，如果正确则连接建立成功，Client和Server进入ESTABLISHED状
+  态，完成三次握手，随后Client与Server之间可以开始传输数据了。
 
 - 四次挥手(我要和你断开链接;好的，断吧。我也要和你断开链接;好的，断吧)
   
@@ -747,12 +748,14 @@ Server检查ack是否为K+1，ACK是否为1，如果正确则连接建立成功�
   
   第三次挥手：Server发送一个FIN，用来关闭Server到Client的数据传送，Server进入LAST_ACK状态。 
   
-  第四次挥手：Client收到FIN后，Client进入TIME_WAIT状态，接着发送一个ACK给Server，确认序号为收到序号+1，Server进入CLOSED状态，完成四次挥手。
+  第四次挥手：Client收到FIN后，Client进入TIME_WAIT状态，接着发送一个ACK给Server，确认序号为收到序号+1，Server进
+  入CLOSED状态，完成四次挥手。
 
 **三次握手**：目的是为了防止已失效的链接请求报文突然又传送到了服务端，因而产生错误。
   
-**四次挥手**：TCP 协议是一种面向连接的、可靠的、基于字节流的运输层通信协议。TCP 是全双工模式，这就意味着，当 A 向 B 发出 FIN 报文段时，只是表示 A 已经没有
-数据要发送了，而此时 A 还是能够接受到来自 B 发出的数据;B 向 A 发出 ACK 报文段也只是告诉 A ，它自己知道 A 没有数据要发了，但 B 还是能够向 A 发送数据。
+**四次挥手**：TCP 协议是一种面向连接的、可靠的、基于字节流的运输层通信协议。TCP 是全双工模式，这就意味着，当 A 
+向 B 发出 FIN 报文段时，只是表示 A 已经没有数据要发送了，而此时 A 还是能够接受到来自 B 发出的数据;B 向 A 发
+出 ACK 报文段也只是告诉 A ，它自己知道 A 没有数据要发了，但 B 还是能够向 A 发送数据。
 ```
 ### 分布式系统、微服务架构
 什么是分布式事务？

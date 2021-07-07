@@ -1,10 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	// 题目：将6，2，10，32，9，5，18，14，30，29从小到大进行排列。
 	// mpSort()
+	WaitGroupDemo()
 }
 
 // 冒泡排序

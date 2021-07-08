@@ -79,22 +79,48 @@ func ChanTask() {
 
 // sync.waitGroup 示例
 func WaitGroupDemo() {
-	var sw *sync.WaitGroup
+	var sw sync.WaitGroup
+	var errNum int32 = 0
+	ctx,cancel := context.WithCancel(context.Background())
 	urls := []string{
 		"https://www.baidu.com",
+		"https://www.jd.com",
+		"https://www.baidu.com",
+		"https://www.jd.com",
+		"htp://www.zhenaiwanghhh.com",
+		"h://www.zhenaiwanghhh.com",
+		"ht://www.zhenaiwanghhh.com",
 		"https://www.jd.com",
 	}
 	for _, url := range urls {
 		sw.Add(1)
-		go func() {
-			fmt.Printf("task start")
+		go func(ctx context.Context, errNum *int32, url string) {
+			fmt.Printf("task start \n")
 			defer sw.Done()
-			_, err := http.Get(url)
-			if err != nil {
-				fmt.Printf("err %v", err)
+			fmt.Println(*errNum)
+			if *errNum >= 2 {
+				cancel()
 			}
-			fmt.Printf("task end")
-		}()
+			go func(ctx context.Context) {
+				select {
+				case <-ctx.Done():
+					fmt.Printf("cancel task")
+					return
+				}
+			}(ctx)
+			_, err := http.Get(url)
+
+			if err != nil {
+				fmt.Printf("err %v \n", err)
+				atomic.AddInt32(errNum,1)
+				return
+			}
+			fmt.Printf("task end \n")
+		}(ctx, &errNum, url)
 	}
 	sw.Wait()
+}
+
+func ChanDemo() {
+
 }

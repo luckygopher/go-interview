@@ -412,13 +412,14 @@ mysql的事务隔离级别默认为Repeatable read(可重复读，可能会出�
 ```markdown
 乐观锁：基于数据版本号实现(基于mvcc理论)
 悲观锁：数据库的锁机制
-间隙锁：范围查询中，存在于范围内，但不存在的记录，这称为间隙，这种锁机制称为间隙锁。
 ```
 innoDB存储引擎的锁的算法有那三种？
 ```markdown
 Record lock: 单个行记录上的锁
 Gap lock: 间隙锁，锁定一个范围，不包括记录本身
 Next-key lock: record+gap 锁定一个范围，包含记录本身
+
+注意：(间隙：范围查询中，存在于范围内，但不存在的记录，这称为间隙)
 ```
 mysql的mvcc实现原理是什么？
 ```markdown

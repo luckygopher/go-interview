@@ -4,6 +4,10 @@
 熟悉语法，撸个百十道基础面试题就差不多了。
 
 ### go语言进阶
+go中有哪些锁？
+```markdown
+
+```
 CSP并发模型？
 ```markdown
 CSP并发模型它并不关注发送消息的实体，而关注的是发送消息时使用的channel，
@@ -93,7 +97,7 @@ type waitq struct {
 // 从chan buf到receiver goroutine，或者是直接从sender goroutine到receiver goroutine。
 
 ```
-channel在哪些情况下会死锁/阻塞？
+channel使用应该注意哪些情况，在哪些情况下会死锁/阻塞？
 ```markdown
 1、一个无缓冲channel在一个主go程里同时进行读和写；
 2、无缓冲channel在go程开启之前使用通道；
@@ -101,6 +105,7 @@ channel在哪些情况下会死锁/阻塞？
 4、读取空的channel；
 5、超过channel缓存继续写入数据；
 6、向已经关闭的channel中写入数据不会导致死锁，但会Panic异常。
+7、close一个已经关闭的channel会Panic异常。
 ```
 那些类型不能作map的为key？map的key为什么是无序的？
 ```markdown

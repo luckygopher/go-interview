@@ -93,10 +93,7 @@ type waitq struct {
 	last  *sudog
 }
 
-// channel的发送和接收操作本质上都是"值的拷贝"(并不是将指针"发送"到了chan里面，
-// 只是拷贝它的值而已)，无论是从sender goroutine的栈到chan buf，还是
-// 从chan buf到receiver goroutine，或者是直接从sender goroutine到receiver goroutine。
-
+// channel的发送和接收操作本质上都是"值的拷贝"(只是拷贝它的值而已)，
 ```
 channel使用应该注意哪些情况，在哪些情况下会死锁/阻塞？
 ```markdown

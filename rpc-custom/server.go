@@ -1,7 +1,6 @@
 package rpc_custom
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -10,7 +9,7 @@ import (
 type Server struct {
 	// 地址
 	addr string
-	// 服务端维护的函数名到函数反射值的map
+	// 服务端维护的函数名与函数反射对象的map
 	funcs map[string]reflect.Value
 }
 
@@ -29,7 +28,7 @@ func (s *Server) Register(fName string, f interface{}) {
 	if _, ok := s.funcs[fName]; ok {
 		return
 	}
-	// map中没有值，则将函数的反射值添加到map
+	// map中没有值，则将函数的反射对象添加到map
 	fVal := reflect.ValueOf(f)
 	s.funcs[fName] = fVal
 }
@@ -58,8 +57,8 @@ func (s *Server) Run() {
 			return
 		}
 		// 对数据解码
-		reqData := Param{}
-		if err := json.Unmarshal(reqByteData, &reqData); err != nil {
+		reqData, err := GobDecode(reqByteData)
+		if err != nil {
 			fmt.Printf("decode err:%v", err)
 			return
 		}
@@ -76,7 +75,7 @@ func (s *Server) Run() {
 		}
 		// 反射调用方法，传入参数
 		result := f.Call(reqArgs)
-		// 解析遍历执行结构，放到一个数组中
+		// 解析遍历执行结果，放到一个数组中
 		respArgs := make([]interface{}, 0, len(result))
 		for _, item := range result {
 			respArgs = append(respArgs, item.Interface())
@@ -84,7 +83,7 @@ func (s *Server) Run() {
 		// 包装数据，返回给客户端
 		respData := Param{reqData.Name, respArgs}
 		// 编码
-		respBytes, err := json.Marshal(respData)
+		respBytes, err := GobEncode(respData)
 		if err != nil {
 			fmt.Printf("encode err:%v", err)
 			return

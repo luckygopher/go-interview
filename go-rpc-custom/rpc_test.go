@@ -1,4 +1,4 @@
-package rpc_custom
+package go_rpc_custom
 
 import (
 	"encoding/gob"

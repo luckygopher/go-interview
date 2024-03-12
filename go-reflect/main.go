@@ -15,12 +15,30 @@ import (
 6.如果想要获取结构体信息或者类型，可以使用 TypeOf
 */
 
+type People interface {
+	Add(a, b int) int
+}
+
 type CustomInt int
 
 type User struct {
 	Name interface{} `json:"name"`
 	Age  CustomInt   `json:"age"`
 }
+
+func (u User) GetName() string {
+	return u.Name.(string)
+}
+
+func (u *User) GetAge() int {
+	return int(u.Age)
+}
+
+func (u *User) Add(a, b int) int {
+	return a + b
+}
+
+type Dog struct{}
 
 func main() {
 	user := User{Name: "张三", Age: 20}
@@ -48,8 +66,7 @@ func main() {
 		}
 	}
 	fmt.Println(user)
-	fmt.Println("------------------")
-	// 获取字段相关的信息:名字、类型、tag
+	fmt.Println("--------获取字段相关的信息:名字、类型、tag----------")
 	uType := reflect.TypeOf(user)
 	for i := 0; i < uType.NumField(); i++ {
 		field := uType.Field(i)
@@ -60,4 +77,29 @@ func main() {
 		fmt.Println("json-tag的值", field.Tag.Get("json"))
 		fmt.Println("----------------")
 	}
+	fmt.Println("--------- 获取方法与函数信息-------")
+	userPtr := &User{
+		Name: "测试",
+		Age:  10,
+	}
+	methodTypeOf := reflect.TypeOf(userPtr.Add)
+	for i := 0; i < methodTypeOf.NumIn(); i++ {
+		fmt.Printf("入参%d 类型：%s\n", i+1, methodTypeOf.In(i).Kind())
+	}
+	for i := 0; i < methodTypeOf.NumOut(); i++ {
+		fmt.Printf("出参%d 类型：%s\n", i+1, methodTypeOf.Out(i).Kind())
+	}
+	fmt.Println("---------判断是否实现了接口-------")
+	// 首先我们需要获取到接口的类型
+	peopleType := reflect.TypeOf((*People)(nil)).Elem()
+	fmt.Println("People是否是一个接口：", peopleType.Kind() == reflect.Interface)
+	// 判断User和Dog是否实现了People接口
+	noPtrUser := reflect.TypeOf(User{})
+	ptrUser := reflect.TypeOf(&User{})
+	noPtrDog := reflect.TypeOf(Dog{})
+	ptrDog := reflect.TypeOf(&Dog{})
+	fmt.Println("noPtrUser是否实现了接口", noPtrUser.Implements(peopleType))
+	fmt.Println("ptrUser是否实现了接口", ptrUser.Implements(peopleType))
+	fmt.Println("noPtrDog是否实现了接口", noPtrDog.Implements(peopleType))
+	fmt.Println("ptrDog是否实现了接口", ptrDog.Implements(peopleType))
 }

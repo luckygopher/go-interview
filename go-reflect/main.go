@@ -102,4 +102,60 @@ func main() {
 	fmt.Println("ptrUser是否实现了接口", ptrUser.Implements(peopleType))
 	fmt.Println("noPtrDog是否实现了接口", noPtrDog.Implements(peopleType))
 	fmt.Println("ptrDog是否实现了接口", ptrDog.Implements(peopleType))
+	fmt.Println("---------指针对象与非指针对象互转-------")
+	uu := User{Name: "小名"}
+	// 指针value 转 非指针value
+	point := reflect.ValueOf(&uu)
+	noPoint := point.Elem()
+	fmt.Printf("point type: %s  kind:%s\n", point.Type(), point.Kind())
+	fmt.Printf("noPoint type: %s  kind:%s\n", noPoint.Type(), noPoint.Kind())
+	// 把 reflect.value 转为 User
+	uu = noPoint.Interface().(User)
+	// ------------接口没有指向具体的值
+	var i interface{}
+	v := reflect.ValueOf(i)
+	fmt.Println(v.Kind() == reflect.Invalid) // 输出invalid true
+	fmt.Println(v.IsValid())                 // false
+	//  -----------value指向一个nil
+	var uuu *User = nil
+	vv := reflect.ValueOf(uuu)
+	if vv.IsValid() {
+		// 调用IsNil()前先确保IsValid(),否则panic，因为nil.call这种是不允许的，会空指针异常
+		fmt.Printf("vv持有的值是nil %t\n", vv.IsNil())
+	}
+	// ------------只声明，里面值都是0值
+	var uuuu User
+	vvv := reflect.ValueOf(uuuu)
+	if vvv.IsValid() {
+		// 调用IsNil()前先确保IsValid(),否则panic，因为nil.call这种是不允许的，会空指针异常
+		fmt.Printf("vvv持有的值是对应类型的0值 %t\n", vv.IsZero())
+	}
+	// CanSet 是否可以设置值
+	cs := User{}
+	csPtr := reflect.ValueOf(&cs).Elem()
+	if csPtr.CanSet() {
+		csPtr.FieldByName("Age").SetInt(10)
+		fmt.Println(cs)
+	} else {
+		fmt.Println("不允许设置值")
+	}
+	// 反射创建结构体
+	ut := reflect.TypeOf(User{})
+	uv := reflect.New(ut) // valueOf(&User{})
+	uv.Elem().FieldByName("Age").SetInt(20)
+	// 反射创建切片
+	sliceType := reflect.TypeOf([]User{})
+	sliceValue := reflect.MakeSlice(sliceType, 1, 3)
+	sliceValue.Index(0).FieldByName("Age").SetInt(30)
+	fmt.Println(sliceValue)
+	// 反射修改切片
+	users := make([]*User, 1, 3)
+	users[0] = &User{Age: 11}
+	usersValue := reflect.ValueOf(&users)
+	usersValue.Elem().Index(0).Set(reflect.ValueOf(&User{Age: 111}))
+	// 修改切片长度
+	usersValue.Elem().SetLen(2)
+	// 反射切片append
+	usersValue = reflect.Append(usersValue.Elem(), reflect.ValueOf(&User{Age: 222}))
+	fmt.Println(usersValue.Interface().([]*User))
 }

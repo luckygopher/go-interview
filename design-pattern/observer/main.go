@@ -83,7 +83,7 @@ func (hero *Hero) OnFriendBeFight(event *Event) {
 	// 本帮派同伴被其他门派揍了，要主动报仇反击!
 	if hero.Party == event.Another.GetParty() {
 		fmt.Println(hero.Title(), "得知消息，发起报仇反击！！！")
-		// todo 会导致死循环
+		// todo 观察者主动触发事件，会导致死循环
 		hero.Fight(event.One, event.Noti)
 		return
 	}

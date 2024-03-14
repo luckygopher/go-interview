@@ -29,12 +29,12 @@ func main() {
 	intelCpt = new(IntelFactory)
 	nvidiaCpt = new(NvidiaFactory)
 	kingstonCpt = new(KingstonFactory)
-	// 一：
+	// 组合一：
 	intelCpt.CreateCPU().Calculate()
 	intelCpt.CreateGPU().Display()
 	intelCpt.CreateRAM().Storage()
 
-	// 二：
+	// 组合二：
 	intelCpt.CreateCPU().Calculate()
 	nvidiaCpt.CreateGPU().Display()
 	kingstonCpt.CreateRAM().Storage()

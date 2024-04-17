@@ -30,7 +30,7 @@ func GetInstance() *singleton {
 	}
 	lock.Lock()
 	defer lock.Unlock()
-	if instance != nil {
+	if instance == nil {
 		instance = new(singleton)
 		atomic.StoreInt32(atomicInt32, 1)
 	}
@@ -42,7 +42,7 @@ var once sync.Once
 
 func GetInstance2() *singleton {
 	once.Do(func() {
-		if instance != nil {
+		if instance == nil {
 			instance = new(singleton)
 		}
 	})

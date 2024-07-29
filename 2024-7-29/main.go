@@ -73,6 +73,7 @@ func producer(filename string, ShapeChan chan<- Shape, wg *sync.WaitGroup) {
 			continue
 		}
 		shapeType := parts[0]
+		// 这里也可以直接使用文件名称来实现分类
 		switch shapeType {
 		case "rectangle":
 			if len(parts) != 3 {
